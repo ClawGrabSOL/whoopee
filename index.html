@@ -332,6 +332,44 @@ const SOL_MINT      = 'So11111111111111111111111111111111111111112';
 const { Connection, PublicKey, Transaction, VersionedTransaction } = solanaWeb3;
 const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
 
+// ─── GLOBAL STATS (CountAPI — persists worldwide) ───
+const NS = 'clawgrabsol-whoopee-v2';
+const CAPI = 'https://api.countapi.xyz';
+
+async function globalIncrement(key) {
+  try {
+    const r = await fetch(`${CAPI}/hit/${NS}/${key}`);
+    const d = await r.json();
+    return d.value || 0;
+  } catch { return null; }
+}
+async function globalGet(key) {
+  try {
+    const r = await fetch(`${CAPI}/get/${NS}/${key}`);
+    const d = await r.json();
+    return d.value || 0;
+  } catch { return null; }
+}
+async function loadGlobalStats() {
+  const [sq, tx] = await Promise.all([
+    globalGet('squishes'),
+    globalGet('txs'),
+  ]);
+  if (sq !== null) {
+    squishes = sq;
+    document.getElementById('squishCount').textContent = sq.toLocaleString();
+  }
+  if (tx !== null) {
+    txCount = tx;
+    document.getElementById('txCount').textContent = tx.toLocaleString();
+    const sol = (tx * 0.01).toFixed(2);
+    document.getElementById('solBought').textContent = sol;
+    document.getElementById('holdersCount').textContent = Math.max(1, Math.floor(tx / 3));
+  }
+}
+// Poll every 5 seconds so all viewers see live updates
+setInterval(loadGlobalStats, 5000);
+
 // ─── STATE ───
 let walletPubkey = null;
 let squishes = 0;
@@ -448,8 +486,12 @@ async function squish() {
   isSquishing = true;
   audioCtx.resume();
 
+  // Optimistic local increment, then sync global
   squishes++;
-  document.getElementById('squishCount').textContent = squishes;
+  document.getElementById('squishCount').textContent = squishes.toLocaleString();
+  globalIncrement('squishes').then(v => {
+    if (v !== null) { squishes = v; document.getElementById('squishCount').textContent = v.toLocaleString(); }
+  });
 
   // Animations
   const cushion = document.getElementById('cushion');
@@ -561,9 +603,17 @@ async function demoBuy(cx, cy) {
 }
 
 function updateStats() {
-  document.getElementById('txCount').textContent = txCount;
-  document.getElementById('solBought').textContent = solSpent.toFixed(2);
-  document.getElementById('holdersCount').textContent = Math.max(1, Math.floor(squishes / 3));
+  // Increment global tx counter, then update display with real global number
+  globalIncrement('txs').then(v => {
+    const realTx = v !== null ? v : txCount;
+    const realSol = (realTx * 0.01).toFixed(2);
+    document.getElementById('txCount').textContent = realTx.toLocaleString();
+    document.getElementById('solBought').textContent = realSol;
+    document.getElementById('holdersCount').textContent = Math.max(1, Math.floor(realTx / 3));
+  });
+  // Optimistic update while API responds
+  document.getElementById('txCount').textContent = txCount.toLocaleString();
+  document.getElementById('solBought').textContent = (txCount * 0.01).toFixed(2);
 }
 
 // ─── NOTIFICATIONS ───
@@ -606,6 +656,9 @@ async function connectWallet() {
     document.getElementById('walletNotice').style.color = 'rgba(0,255,136,0.5)';
   } catch(e) {}
 }
+
+// Load global stats on boot
+loadGlobalStats();
 
 // Auto reconnect
 if (window.solana?.isPhantom) {
