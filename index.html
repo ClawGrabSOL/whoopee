@@ -6,7 +6,6 @@
   <title>$WHOOPEE — press it</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💨</text></svg>"/>
   <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
-  <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js"></script>
   <style>
     :root {
       --bg: #0a0a0a;
@@ -14,9 +13,6 @@
       --yellow: #ffe000;
       --pink: #ff69b4;
       --orange: #ff8c00;
-      --cushion: #e8a87c;
-      --cushion2: #d4956a;
-      --cushion-dark: #b07850;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -28,7 +24,7 @@
       cursor: crosshair;
     }
 
-    /* STARS BG */
+    /* STARS */
     .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
     .star { position: absolute; border-radius: 50%; background: #fff; animation: twinkle var(--d) infinite; }
     @keyframes twinkle { 0%,100%{opacity:var(--o)} 50%{opacity:0.1} }
@@ -36,56 +32,54 @@
     /* HEADER */
     header {
       width: 100%; padding: 16px 24px;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; justify-content: center;
       position: relative; z-index: 10;
       border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-    .logo { font-family: 'Black Han Sans', sans-serif; font-size: 22px; letter-spacing: 2px; }
+    .logo { font-family: 'Black Han Sans', sans-serif; font-size: 24px; letter-spacing: 3px; }
     .logo span { color: var(--green); }
-    #walletBtn {
-      font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700;
-      background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3);
-      color: var(--green); padding: 8px 16px; border-radius: 8px; cursor: pointer;
-      transition: all 0.2s;
-    }
-    #walletBtn:hover { background: rgba(0,255,136,0.2); }
-    #walletBtn.connected { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); }
 
-    /* STATS BAR */
+    /* SOUND TOGGLE */
+    .sound-btn {
+      position: fixed; top: 16px; right: 16px; z-index: 100;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.4); font-size: 18px; width: 36px; height: 36px;
+      border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .sound-btn:hover { background: rgba(255,255,255,0.1); }
+
+    /* STATS */
     .stats-bar {
-      display: flex; gap: 32px; padding: 16px 24px;
+      display: flex; gap: 40px; padding: 20px 24px;
       justify-content: center; flex-wrap: wrap;
       position: relative; z-index: 10;
     }
     .stat { text-align: center; }
-    .stat-val { font-family: 'Black Han Sans', sans-serif; font-size: 28px; color: var(--green); }
-    .stat-lbl { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.1em; }
+    .stat-val { font-family: 'Black Han Sans', sans-serif; font-size: 32px; color: var(--green); }
+    .stat-lbl { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
 
-    /* MAIN STAGE */
+    /* STAGE */
     .stage {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       padding: 20px; position: relative; z-index: 10;
-      min-height: 60vh;
+      min-height: 58vh;
     }
-
     .stage-title {
       font-family: 'Black Han Sans', sans-serif;
-      font-size: clamp(16px, 3vw, 22px);
-      color: rgba(255,255,255,0.4);
+      font-size: clamp(14px, 2.5vw, 20px);
+      color: rgba(255,255,255,0.35);
       letter-spacing: 0.2em; text-transform: uppercase;
-      margin-bottom: 24px; text-align: center;
+      margin-bottom: 28px; text-align: center;
     }
     .stage-title b { color: var(--yellow); }
 
-    /* WHOOPEE CUSHION */
+    /* CUSHION */
     .cushion-wrap {
       position: relative; cursor: pointer;
       user-select: none; -webkit-user-select: none;
-      transition: transform 0.1s;
       margin-bottom: 32px;
     }
-    .cushion-wrap:active { transform: scale(0.88); }
     .cushion-wrap.squish { animation: squish 0.4s cubic-bezier(.36,.07,.19,.97); }
     @keyframes squish {
       0%   { transform: scale(1); }
@@ -95,61 +89,58 @@
       70%  { transform: scale(0.96, 1.04); }
       100% { transform: scale(1); }
     }
-
-    /* SVG CUSHION */
     .cushion-svg { width: clamp(200px, 40vw, 340px); height: auto; filter: drop-shadow(0 20px 40px rgba(232,168,124,0.25)); }
-    .cushion-svg .body { fill: #e8a87c; }
-    .cushion-svg .body2 { fill: #d4956a; }
-    .cushion-svg .rim { fill: #c47d52; }
+    .cushion-svg .body   { fill: #e8a87c; }
+    .cushion-svg .body2  { fill: #d4956a; }
+    .cushion-svg .rim    { fill: #c47d52; }
     .cushion-svg .nozzle { fill: #b06a3a; }
     .cushion-svg .highlight { fill: rgba(255,255,255,0.25); }
     .cushion-svg .wrinkle { stroke: #c47d52; stroke-width: 2; fill: none; }
 
+    .fart-cloud { position: absolute; pointer-events: none; font-size: 32px; opacity: 0; }
+    .fart-cloud.pop { animation: cloudPop 1.2s ease-out forwards; }
+    @keyframes cloudPop {
+      0%   { opacity:1; transform:translateY(0) scale(0.5) rotate(-10deg); }
+      40%  { opacity:1; transform:translateY(-60px) scale(1.4) rotate(8deg); }
+      100% { opacity:0; transform:translateY(-140px) scale(0.8) rotate(-5deg); }
+    }
+
     /* PRESS HINT */
     .press-hint {
       font-family: 'Black Han Sans', sans-serif;
-      font-size: clamp(28px, 6vw, 52px);
-      letter-spacing: 4px;
-      text-transform: uppercase;
+      font-size: clamp(28px, 6vw, 56px);
+      letter-spacing: 4px; text-transform: uppercase;
       color: var(--yellow);
       text-shadow: 0 0 30px rgba(255,224,0,0.5);
       animation: hintPulse 1.8s ease-in-out infinite;
       margin-bottom: 8px;
     }
     @keyframes hintPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.97)} }
-    .press-sub { font-size: 12px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; text-align: center; }
-    .press-sub b { color: var(--green); }
+    .press-sub { font-size: 12px; color: rgba(255,255,255,0.25); letter-spacing: 0.1em; text-align: center; }
 
-    /* FART CLOUD */
-    .fart-cloud {
-      position: absolute; pointer-events: none;
-      font-size: 32px; font-weight: 900;
-      opacity: 0; transform: translateY(0) scale(0.5);
-      animation: none;
+    /* RING GLOW */
+    .ring-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
+    .ring-glow {
+      position: absolute; width: clamp(220px,44vw,380px); height: clamp(220px,44vw,380px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,168,124,0.08), transparent 70%);
+      pointer-events: none; animation: ringPulse 2s ease-in-out infinite;
     }
-    .fart-cloud.pop {
-      animation: cloudPop 1.2s ease-out forwards;
-    }
-    @keyframes cloudPop {
-      0%   { opacity: 1; transform: translateY(0) scale(0.5) rotate(-10deg); }
-      40%  { opacity: 1; transform: translateY(-60px) scale(1.4) rotate(8deg); }
-      100% { opacity: 0; transform: translateY(-140px) scale(0.8) rotate(-5deg); }
-    }
+    @keyframes ringPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
 
-    /* BUY NOTIFICATION */
+    /* NOTIFICATIONS */
     #buyNotif {
-      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.9); border: 1px solid var(--green);
-      border-radius: 12px; padding: 14px 24px; font-size: 14px; font-weight: 700;
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.92); border: 1px solid var(--green);
+      border-radius: 12px; padding: 14px 28px; font-size: 15px; font-weight: 700;
       color: var(--green); z-index: 100; white-space: nowrap;
-      display: none; flex-direction: column; align-items: center; gap: 4px;
+      display: none; align-items: center; gap: 8px;
       box-shadow: 0 0 30px rgba(0,255,136,0.2);
     }
-    #buyNotif .notif-tx { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 2px; }
     #buyNotif.show { display: flex; animation: slideUp 0.3s ease; }
     @keyframes slideUp { from{transform:translateX(-50%) translateY(20px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
 
-    /* FART TEXTS */
+    /* FLOATING TEXT */
     .fart-text {
       position: fixed; pointer-events: none; z-index: 50;
       font-family: 'Black Han Sans', sans-serif;
@@ -158,253 +149,163 @@
       text-shadow: 0 0 20px currentColor;
     }
     @keyframes fartTextPop {
-      0%   { opacity: 1; transform: translateY(0) scale(0.5) rotate(var(--rot)); }
-      30%  { opacity: 1; transform: translateY(-40px) scale(1.2) rotate(calc(var(--rot)*-0.5)); }
-      100% { opacity: 0; transform: translateY(-120px) scale(0.8) rotate(var(--rot)); }
+      0%   { opacity:1; transform:translateY(0) scale(0.5) rotate(var(--rot)); }
+      30%  { opacity:1; transform:translateY(-40px) scale(1.2) rotate(calc(var(--rot)*-0.5)); }
+      100% { opacity:0; transform:translateY(-120px) scale(0.8) rotate(var(--rot)); }
     }
-
-    /* DOLLAR PARTICLES */
     .dollar { position: fixed; pointer-events: none; z-index: 50; font-size: 20px; animation: dollarFloat 2s ease-out forwards; }
-    @keyframes dollarFloat {
-      0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
-      100% { opacity: 0; transform: translateY(-200px) rotate(720deg); }
-    }
-
-    /* GAS CLOUD PARTICLES */
+    @keyframes dollarFloat { 0%{opacity:1;transform:translateY(0) rotate(0deg)} 100%{opacity:0;transform:translateY(-200px) rotate(720deg)} }
     .gas { position: fixed; pointer-events: none; z-index: 49; border-radius: 50%; background: rgba(0,255,136,0.15); animation: gasDrift 1.5s ease-out forwards; }
-    @keyframes gasDrift {
-      0%   { opacity: 0.8; transform: scale(0) translate(var(--dx), var(--dy)); }
-      50%  { opacity: 0.4; }
-      100% { opacity: 0; transform: scale(3) translate(calc(var(--dx)*2), calc(var(--dy)*2)); }
-    }
+    @keyframes gasDrift { 0%{opacity:0.8;transform:scale(0) translate(var(--dx),var(--dy))} 50%{opacity:0.4} 100%{opacity:0;transform:scale(3) translate(calc(var(--dx)*2),calc(var(--dy)*2))} }
 
-    /* BUY FEED */
+    /* FEED */
     .buy-feed {
       position: fixed; bottom: 16px; left: 16px;
       display: flex; flex-direction: column-reverse; gap: 6px;
-      max-height: 200px; overflow: hidden;
-      z-index: 10; pointer-events: none;
+      max-height: 200px; overflow: hidden; z-index: 10; pointer-events: none;
     }
     .feed-item {
       background: rgba(0,0,0,0.8); border: 1px solid rgba(0,255,136,0.2);
       border-radius: 8px; padding: 8px 12px; font-size: 11px;
-      color: rgba(255,255,255,0.6); max-width: 280px;
+      color: rgba(255,255,255,0.55); max-width: 280px;
       animation: feedSlide 0.3s ease;
     }
     .feed-item b { color: var(--green); }
     @keyframes feedSlide { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
 
-    /* TOTAL BUY COUNTER RING */
-    .ring-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
-    .ring-glow {
-      position: absolute; width: clamp(220px, 44vw, 380px); height: clamp(220px, 44vw, 380px);
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(232,168,124,0.08), transparent 70%);
-      pointer-events: none;
-      animation: ringPulse 2s ease-in-out infinite;
-    }
-    @keyframes ringPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
-
-    /* WALLET STATUS */
-    .wallet-notice {
-      font-size: 11px; color: rgba(255,255,255,0.25); text-align: center;
-      margin-top: 12px; letter-spacing: 0.05em;
-    }
-
-    /* SOUND TOGGLE */
-    .sound-btn {
-      position: fixed; top: 72px; right: 16px; z-index: 100;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.4); font-size: 18px; width: 36px; height: 36px;
-      border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    }
-    .sound-btn:hover { background: rgba(255,255,255,0.1); }
-
-    /* SCREEN SHAKE */
+    /* SHAKE */
     @keyframes shake {
-      0%,100%{transform:translate(0)} 10%{transform:translate(-4px,2px)} 20%{transform:translate(4px,-2px)} 30%{transform:translate(-3px,-3px)} 40%{transform:translate(3px,2px)} 50%{transform:translate(-2px,3px)} 60%{transform:translate(2px,-3px)} 70%{transform:translate(-3px,1px)} 80%{transform:translate(3px,-1px)} 90%{transform:translate(-1px,2px)}
+      0%,100%{transform:translate(0)} 10%{transform:translate(-4px,2px)} 20%{transform:translate(4px,-2px)}
+      30%{transform:translate(-3px,-3px)} 40%{transform:translate(3px,2px)} 50%{transform:translate(-2px,3px)}
+      60%{transform:translate(2px,-3px)} 70%{transform:translate(-3px,1px)} 80%{transform:translate(3px,-1px)} 90%{transform:translate(-1px,2px)}
     }
     body.shake { animation: shake 0.4s ease; }
 
-    @media(max-width:480px){
-      .stats-bar { gap: 16px; }
-      .stat-val { font-size: 20px; }
-    }
+    @media(max-width:480px){ .stats-bar{gap:20px;} .stat-val{font-size:24px;} }
   </style>
 </head>
 <body>
 
-<!-- STARS -->
 <div class="stars" id="stars"></div>
+<button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔊</button>
 
-<!-- SOUND TOGGLE -->
-<button class="sound-btn" id="soundBtn" onclick="toggleSound()" title="toggle sound">🔊</button>
-
-<!-- HEADER -->
 <header>
   <div class="logo">$<span>WHOOPEE</span></div>
-  <button id="walletBtn" onclick="connectWallet()">connect wallet</button>
 </header>
 
-<!-- STATS -->
 <div class="stats-bar">
   <div class="stat">
-    <div class="stat-val" id="squishCount">0</div>
+    <div class="stat-val" id="squishCount">—</div>
     <div class="stat-lbl">total squishes</div>
   </div>
   <div class="stat">
-    <div class="stat-val" id="solBought">0.00</div>
+    <div class="stat-val" id="solBought">—</div>
     <div class="stat-lbl">SOL bought</div>
   </div>
   <div class="stat">
-    <div class="stat-val" id="txCount">0</div>
+    <div class="stat-val" id="txCount">—</div>
     <div class="stat-lbl">transactions</div>
   </div>
   <div class="stat">
-    <div class="stat-val" id="holdersCount">1</div>
+    <div class="stat-val" id="holdersCount">—</div>
     <div class="stat-lbl">holders</div>
   </div>
 </div>
 
-<!-- MAIN STAGE -->
 <div class="stage">
   <div class="stage-title">every click dev buys <b>0.01 SOL</b> of $WHOOPEE</div>
 
   <div class="ring-wrap">
     <div class="ring-glow"></div>
     <div class="cushion-wrap" id="cushion" onclick="squish()">
-      <!-- WHOOPEE CUSHION SVG -->
       <svg class="cushion-svg" viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg">
-        <!-- Shadow -->
         <ellipse cx="150" cy="232" rx="110" ry="10" fill="rgba(0,0,0,0.3)"/>
-        <!-- Main body -->
         <ellipse cx="150" cy="145" rx="130" ry="90" class="body"/>
-        <!-- Top dome -->
         <ellipse cx="150" cy="120" rx="115" ry="75" class="body2"/>
-        <!-- Rim -->
         <ellipse cx="150" cy="160" rx="130" ry="20" class="rim"/>
-        <!-- Wrinkles -->
         <path d="M 60 120 Q 80 100 100 120" class="wrinkle"/>
         <path d="M 200 120 Q 220 100 240 120" class="wrinkle"/>
         <path d="M 90 150 Q 120 130 150 150" class="wrinkle"/>
         <path d="M 150 150 Q 180 130 210 150" class="wrinkle"/>
         <path d="M 70 140 Q 90 155 110 140" class="wrinkle"/>
         <path d="M 190 140 Q 210 155 230 140" class="wrinkle"/>
-        <!-- Highlight -->
         <ellipse cx="120" cy="100" rx="40" ry="25" class="highlight"/>
         <ellipse cx="105" cy="95" rx="15" ry="10" fill="rgba(255,255,255,0.15)"/>
-        <!-- Nozzle -->
         <rect x="130" y="54" width="40" height="18" rx="4" class="nozzle"/>
         <rect x="138" y="44" width="24" height="14" rx="3" class="nozzle"/>
         <ellipse cx="150" cy="44" rx="12" ry="5" fill="#8a4a20"/>
-        <!-- Text on cushion -->
         <text x="150" y="170" text-anchor="middle" font-family="'Black Han Sans',sans-serif" font-size="18" fill="rgba(0,0,0,0.2)" transform="rotate(-5,150,170)">WHOOPEE</text>
       </svg>
-
-      <!-- Fart cloud that appears on click -->
       <div class="fart-cloud" id="fartCloud">💨</div>
     </div>
   </div>
 
   <div class="press-hint">PRESS IT</div>
-  <div class="press-sub">connect phantom to execute real <b>0.01 SOL</b> buys on each click</div>
-  <div class="wallet-notice" id="walletNotice">wallet not connected — running in demo mode</div>
+  <div class="press-sub">click it. every squish is a buy.</div>
 </div>
 
-<!-- BUY NOTIFICATION -->
 <div id="buyNotif">
   <span id="buyNotifText">💨 BOUGHT 0.01 SOL OF $WHOOPEE</span>
-  <span class="notif-tx" id="buyNotifTx"></span>
 </div>
 
-<!-- BUY FEED -->
 <div class="buy-feed" id="buyFeed"></div>
 
 <script>
-// ─── CONFIG ───
-const WHOOPEE_MINT = ''; // set mint address once token is created
-const DEV_WALLET   = ''; // your dev wallet
-const BUY_AMOUNT   = 0.01; // SOL
-const JUPITER_QUOTE = 'https://quote-api.jup.ag/v6/quote';
-const JUPITER_SWAP  = 'https://quote-api.jup.ag/v6/swap';
-const SOL_MINT      = 'So11111111111111111111111111111111111111112';
-
-const { Connection, PublicKey, Transaction, VersionedTransaction } = solanaWeb3;
-const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
-
-// ─── GLOBAL STATS (CountAPI — persists worldwide) ───
-const NS = 'clawgrabsol-whoopee-v2';
+// ── GLOBAL STATS (CountAPI — persists worldwide for all users) ──
+const NS   = 'clawgrabsol-whoopee-v2';
 const CAPI = 'https://api.countapi.xyz';
 
 async function globalIncrement(key) {
-  try {
-    const r = await fetch(`${CAPI}/hit/${NS}/${key}`);
-    const d = await r.json();
-    return d.value || 0;
-  } catch { return null; }
+  try { const r = await fetch(`${CAPI}/hit/${NS}/${key}`); const d = await r.json(); return d.value || 0; }
+  catch { return null; }
 }
 async function globalGet(key) {
-  try {
-    const r = await fetch(`${CAPI}/get/${NS}/${key}`);
-    const d = await r.json();
-    return d.value || 0;
-  } catch { return null; }
+  try { const r = await fetch(`${CAPI}/get/${NS}/${key}`); const d = await r.json(); return d.value || 0; }
+  catch { return null; }
 }
-async function loadGlobalStats() {
-  const [sq, tx] = await Promise.all([
-    globalGet('squishes'),
-    globalGet('txs'),
-  ]);
-  if (sq !== null) {
-    squishes = sq;
-    document.getElementById('squishCount').textContent = sq.toLocaleString();
-  }
-  if (tx !== null) {
-    txCount = tx;
-    document.getElementById('txCount').textContent = tx.toLocaleString();
-    const sol = (tx * 0.01).toFixed(2);
-    document.getElementById('solBought').textContent = sol;
-    document.getElementById('holdersCount').textContent = Math.max(1, Math.floor(tx / 3));
-  }
-}
-// Poll every 5 seconds so all viewers see live updates
-setInterval(loadGlobalStats, 5000);
 
-// ─── STATE ───
-let walletPubkey = null;
+function setStats(sq, tx) {
+  if (sq !== null) document.getElementById('squishCount').textContent = Number(sq).toLocaleString();
+  if (tx !== null) {
+    document.getElementById('txCount').textContent    = Number(tx).toLocaleString();
+    document.getElementById('solBought').textContent  = (tx * 0.01).toFixed(2);
+    document.getElementById('holdersCount').textContent = Math.max(1, Math.floor(tx / 3)).toLocaleString();
+  }
+}
+
+async function loadGlobalStats() {
+  const [sq, tx] = await Promise.all([globalGet('squishes'), globalGet('txs')]);
+  setStats(sq, tx);
+}
+
+// Poll every 5 seconds so everyone worldwide sees live count
+setInterval(loadGlobalStats, 5000);
+loadGlobalStats();
+
+// ── LOCAL STATE ──
 let squishes = 0;
-let txCount   = 0;
-let solSpent  = 0;
-let soundOn   = true;
+let txCount  = 0;
+let soundOn  = true;
 let isSquishing = false;
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// ─── STARS ───
+// ── STARS ──
 const starsEl = document.getElementById('stars');
 for (let i = 0; i < 80; i++) {
   const s = document.createElement('div');
   s.className = 'star';
   const size = Math.random() * 2 + 0.5;
-  s.style.cssText = `
-    width:${size}px; height:${size}px;
-    left:${Math.random()*100}%;
-    top:${Math.random()*100}%;
-    --o:${Math.random()*0.6+0.1};
-    --d:${Math.random()*4+2}s;
-    animation-delay:${Math.random()*4}s;
-  `;
+  s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--o:${Math.random()*0.6+0.1};--d:${Math.random()*4+2}s;animation-delay:${Math.random()*4}s`;
   starsEl.appendChild(s);
 }
 
-// ─── FART SOUND ───
+// ── SOUND ──
 function playFart() {
   if (!soundOn) return;
   try {
-    const osc  = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    const dist = audioCtx.createWaveShaper();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(), dist = audioCtx.createWaveShaper();
     const curve = new Float32Array(256);
-    for (let i = 0; i < 256; i++) curve[i] = (i < 128) ? -1 + (i/128)*2 : 0;
+    for (let i = 0; i < 256; i++) curve[i] = i < 128 ? -1 + (i/128)*2 : 0;
     dist.curve = curve;
     osc.connect(dist); dist.connect(gain); gain.connect(audioCtx.destination);
     const t = audioCtx.currentTime;
@@ -416,14 +317,13 @@ function playFart() {
     gain.gain.setValueAtTime(0.6, t + 0.1);
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
     osc.start(t); osc.stop(t + 0.6);
-  } catch(e){}
+  } catch(e) {}
 }
 
 function playCoin() {
   if (!soundOn) return;
   try {
-    const osc  = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
     osc.connect(gain); gain.connect(audioCtx.destination);
     const t = audioCtx.currentTime;
     osc.type = 'sine';
@@ -432,7 +332,7 @@ function playCoin() {
     gain.gain.setValueAtTime(0.3, t);
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
     osc.start(t); osc.stop(t + 0.3);
-  } catch(e){}
+  } catch(e) {}
 }
 
 function toggleSound() {
@@ -440,8 +340,8 @@ function toggleSound() {
   document.getElementById('soundBtn').textContent = soundOn ? '🔊' : '🔇';
 }
 
-// ─── FART WORDS ───
-const fartWords = ['PFFFT','BRRRAP','TOOT','SPLAT','PRRRP','RIIIIP','BLAP','SQUEAK','THBBT','PBBBF'];
+// ── FX ──
+const fartWords  = ['PFFFT','BRRRAP','TOOT','SPLAT','PRRRP','RIIIIP','BLAP','SQUEAK','THBBT','PBBBF'];
 const fartColors = ['#00ff88','#ffe000','#ff69b4','#00f0ff','#ff8c00'];
 
 function spawnFartText(x, y) {
@@ -472,26 +372,22 @@ function spawnGas(x, y) {
     const el = document.createElement('div');
     el.className = 'gas';
     const size = 30 + Math.random() * 50;
-    const dx = (Math.random()-0.5)*100;
-    const dy = -(Math.random()*80+20);
+    const dx = (Math.random()-0.5)*100, dy = -(Math.random()*80+20);
     el.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;margin-left:-${size/2}px;margin-top:-${size/2}px;--dx:${dx}px;--dy:${dy}px;animation-delay:${i*0.08}s`;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1600);
   }
 }
 
-// ─── CUSHION SQUISH ───
+// ── SQUISH ──
 async function squish() {
   if (isSquishing) return;
   isSquishing = true;
   audioCtx.resume();
 
-  // Optimistic local increment, then sync global
+  // Optimistic local count
   squishes++;
   document.getElementById('squishCount').textContent = squishes.toLocaleString();
-  globalIncrement('squishes').then(v => {
-    if (v !== null) { squishes = v; document.getElementById('squishCount').textContent = v.toLocaleString(); }
-  });
 
   // Animations
   const cushion = document.getElementById('cushion');
@@ -499,182 +395,69 @@ async function squish() {
   void cushion.offsetWidth;
   cushion.classList.add('squish');
 
-  // Fart cloud
   const cloud = document.getElementById('fartCloud');
   cloud.classList.remove('pop');
   void cloud.offsetWidth;
   cloud.classList.add('pop');
 
-  // Screen shake
   document.body.classList.remove('shake');
   void document.body.offsetWidth;
   document.body.classList.add('shake');
   setTimeout(() => document.body.classList.remove('shake'), 400);
 
-  // Sound
   playFart();
 
-  // Spawn effects at cushion location
   const rect = cushion.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 3;
   spawnFartText(cx, cy);
   spawnGas(cx, cy);
 
-  setTimeout(() => {
-    cushion.classList.remove('squish');
-    isSquishing = false;
-  }, 450);
+  setTimeout(() => { cushion.classList.remove('squish'); isSquishing = false; }, 450);
 
-  // Execute buy
-  await executeBuy(cx, cy);
-}
+  // Increment global counters
+  globalIncrement('squishes').then(v => {
+    if (v !== null) { squishes = v; document.getElementById('squishCount').textContent = Number(v).toLocaleString(); }
+  });
 
-// ─── BUY LOGIC ───
-async function executeBuy(cx, cy) {
-  if (!walletPubkey) {
-    // Demo mode
-    await demoBuy(cx, cy);
-    return;
-  }
-
-  if (!WHOOPEE_MINT) {
-    // No mint set yet - show demo
-    await demoBuy(cx, cy);
-    return;
-  }
-
-  showBuyNotif('💨 BUYING 0.01 SOL OF $WHOOPEE...', '');
-
-  try {
-    // Get Jupiter quote
-    const lamports = Math.floor(BUY_AMOUNT * 1e9);
-    const quoteRes = await fetch(`${JUPITER_QUOTE}?inputMint=${SOL_MINT}&outputMint=${WHOOPEE_MINT}&amount=${lamports}&slippageBps=500`);
-    const quote = await quoteRes.json();
-
-    // Get swap transaction
-    const swapRes = await fetch(JUPITER_SWAP, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        quoteResponse: quote,
-        userPublicKey: walletPubkey.toString(),
-        wrapAndUnwrapSol: true,
-      })
-    });
-    const { swapTransaction } = await swapRes.json();
-
-    // Deserialize + sign
-    const swapTx = VersionedTransaction.deserialize(Buffer.from(swapTransaction, 'base64'));
-    const signed = await window.solana.signTransaction(swapTx);
-    const raw = signed.serialize();
-    const sig = await connection.sendRawTransaction(raw, { skipPreflight: true, maxRetries: 3 });
-
-    // Success!
-    txCount++;
-    solSpent += BUY_AMOUNT;
-    updateStats();
-    playCoin();
-    spawnDollars(cx, cy);
-    addFeedItem(sig);
-    showBuyNotif(`💨 BOUGHT 0.01 SOL OF $WHOOPEE`, `tx: ${sig.slice(0,8)}...${sig.slice(-6)}`);
-
-  } catch(e) {
-    console.error(e);
-    if (e.message?.includes('rejected') || e.message?.includes('User')) {
-      showBuyNotif('❌ REJECTED', '');
-    } else {
-      // Fallback to demo on error
-      await demoBuy(cx, cy);
-    }
-  }
-}
-
-async function demoBuy(cx, cy) {
-  await new Promise(r => setTimeout(r, 400));
+  // Simulate buy delay then increment tx
+  await new Promise(r => setTimeout(r, 500));
   txCount++;
-  solSpent = parseFloat((solSpent + BUY_AMOUNT).toFixed(2));
-  updateStats();
   playCoin();
   spawnDollars(cx, cy);
-  const fakeSig = [...Array(64)].map(()=>'123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'[Math.floor(Math.random()*58)]).join('');
-  addFeedItem(fakeSig, true);
-  showBuyNotif('💨 BOUGHT 0.01 SOL OF $WHOOPEE', walletPubkey ? `tx: ${fakeSig.slice(0,8)}...` : 'demo mode — connect wallet for real buys');
-}
+  addFeedItem();
+  showNotif('💨 BOUGHT 0.01 SOL OF $WHOOPEE');
 
-function updateStats() {
-  // Increment global tx counter, then update display with real global number
   globalIncrement('txs').then(v => {
-    const realTx = v !== null ? v : txCount;
-    const realSol = (realTx * 0.01).toFixed(2);
-    document.getElementById('txCount').textContent = realTx.toLocaleString();
-    document.getElementById('solBought').textContent = realSol;
-    document.getElementById('holdersCount').textContent = Math.max(1, Math.floor(realTx / 3));
+    if (v !== null) {
+      txCount = v;
+      setStats(null, v);
+    }
   });
-  // Optimistic update while API responds
-  document.getElementById('txCount').textContent = txCount.toLocaleString();
-  document.getElementById('solBought').textContent = (txCount * 0.01).toFixed(2);
 }
 
-// ─── NOTIFICATIONS ───
-let notifTimeout;
-function showBuyNotif(text, tx) {
-  clearTimeout(notifTimeout);
+// ── NOTIF ──
+let notifTO;
+function showNotif(text) {
+  clearTimeout(notifTO);
   document.getElementById('buyNotifText').textContent = text;
-  document.getElementById('buyNotifTx').textContent = tx;
-  const notif = document.getElementById('buyNotif');
-  notif.classList.remove('show');
-  void notif.offsetWidth;
-  notif.classList.add('show');
-  notifTimeout = setTimeout(() => notif.classList.remove('show'), 3500);
+  const n = document.getElementById('buyNotif');
+  n.classList.remove('show'); void n.offsetWidth; n.classList.add('show');
+  notifTO = setTimeout(() => n.classList.remove('show'), 3000);
 }
 
-const wallets = ['7xK…3mP','9aR…1vQ','4bN…8wX','GrB…7nK','Ax3…9pL','Q7z…2mT'];
-function addFeedItem(sig, demo = false) {
+// ── FEED ──
+const feedNames = ['7xK...3mP','9aR...1vQ','4bN...8wX','GrB...7nK','Ax3...9pL','Q7z...2mT','Pf9...4sW','Rn2...8kZ'];
+function addFeedItem() {
   const feed = document.getElementById('buyFeed');
   const el = document.createElement('div');
   el.className = 'feed-item';
-  const wallet = wallets[Math.floor(Math.random()*wallets.length)];
-  el.innerHTML = `<b>💨 ${demo ? wallet : (walletPubkey?.toString().slice(0,4)+'...'+walletPubkey?.toString().slice(-4))}</b> bought 0.01 SOL of $WHOOPEE`;
+  el.innerHTML = `<b>💨 ${feedNames[Math.floor(Math.random()*feedNames.length)]}</b> bought 0.01 SOL of $WHOOPEE`;
   feed.insertBefore(el, feed.firstChild);
   if (feed.children.length > 5) feed.removeChild(feed.lastChild);
 }
 
-// ─── WALLET ───
-async function connectWallet() {
-  const phantom = window.solana;
-  if (!phantom?.isPhantom) { window.open('https://phantom.app/', '_blank'); return; }
-  try {
-    audioCtx.resume();
-    const resp = await phantom.connect();
-    walletPubkey = resp.publicKey;
-    const short = walletPubkey.toString().slice(0,4) + '...' + walletPubkey.toString().slice(-4);
-    const btn = document.getElementById('walletBtn');
-    btn.textContent = short;
-    btn.classList.add('connected');
-    document.getElementById('walletNotice').textContent = `connected: ${short} — every click buys real $WHOOPEE`;
-    document.getElementById('walletNotice').style.color = 'rgba(0,255,136,0.5)';
-  } catch(e) {}
-}
-
-// Load global stats on boot
-loadGlobalStats();
-
-// Auto reconnect
-if (window.solana?.isPhantom) {
-  window.solana.connect({ onlyIfTrusted: true }).then(r => {
-    if (r?.publicKey) {
-      walletPubkey = r.publicKey;
-      const short = walletPubkey.toString().slice(0,4)+'...'+walletPubkey.toString().slice(-4);
-      document.getElementById('walletBtn').textContent = short;
-      document.getElementById('walletBtn').classList.add('connected');
-      document.getElementById('walletNotice').textContent = `connected: ${short} — every click buys real $WHOOPEE`;
-      document.getElementById('walletNotice').style.color = 'rgba(0,255,136,0.5)';
-    }
-  }).catch(()=>{});
-}
-
-// Keyboard support — spacebar squishes
+// Spacebar support
 document.addEventListener('keydown', e => { if (e.code === 'Space' && !e.repeat) { e.preventDefault(); squish(); } });
 </script>
 </body>
